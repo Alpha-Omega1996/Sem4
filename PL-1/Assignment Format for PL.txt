@@ -1,0 +1,30 @@
+Title:
+Problem Statement:
+Theory:
+Mathematical Model:
+Implementation: (Algorithm)
+Result: (Output)
+Conclusion:
+
+A1:
+Functions for Computer Componenets.
+Operations.
+Inbuilt Functions used.
+
+A2:
+Aspect Ratio.
+Resolution.
+Pixel?
+Frame Buffer.
+Refreshing/Refresh Rate.
+Windows Coordinate System.
+Difference between that and Cardinal Coordinate System.
+Inbuilt Functions.
+
+A4:
+Concept of Inheritence.
+Types of Inheritance.
+Features of Inheritance.
+Inbuilt Functions.
+
+A3:

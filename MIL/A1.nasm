@@ -1,0 +1,162 @@
+global _start
+
+section .data
+welcome db 0x0A,"This program will allow you to add Hexadecimal numbers.",0x0A
+lwelcome equ $-welcome
+limit db 0x0A,"Enter the count of numbers you will add: "
+llimit equ $-limit
+num db 0x0A,"Enter a hex number: "
+lnum equ $-num
+resu1 db 0x0A,"Sum of "
+lresu1 equ $-resu1
+resu2 db " numbers entered is: "
+lresu2 equ $-resu2
+
+section .bss
+	;macros
+%macro print 2
+mov rax, 1
+mov rdi, 1
+mov rsi, %1
+mov rdx, %2
+syscall
+%endmacro
+
+%macro println 0
+mov rax, 1
+mov rdi, 1
+mov rsi, 0x0A
+mov rdx, 1
+syscall
+%endmacro
+
+%macro scan 2
+mov rax, 0
+mov rdi, 0
+mov rsi, %1
+mov rdi, %2
+syscall
+%endmacro
+	;variables
+arr resq 10
+temp resb 9
+count resb 2
+ans resq 1
+
+	;total size of variables = 10*8 + 9 + 2 + 1*8 = 99 bytes
+
+section .text
+_start:
+
+print welcome, lwelcome
+print limit, llimit
+
+mov rax, 1
+mov rdi, 15
+
+xor rcx, rcx
+mov cx, 0x03
+mov rax, [temp]
+xor rdx, rdx
+
+conv1:
+sub al, 0x30		;loop to convert 2 digit input to decimal.
+inc dl
+rol rax, 0x08		;works only if 1 or 2 digits are given => range = 0-99
+cmp al, 0x0A
+loopne conv1
+
+mov cx, dx
+rep ror rax, 0x08
+
+mov cx, dx
+mov rbx, rax
+xor rax, rax
+
+addup:
+add al, bl
+rol rbx, 0x08
+cmp bl, 0x0A
+loopne addup
+
+mov word[count], ax
+mov qword[temp], 0x00
+
+xor rbx, rbx
+mov bx, word[count]
+mov rsi, arr
+xor rax, rax
+xor rdx, rdx
+
+input:
+print num, lnum
+scan temp, 0x09			;prompt and take number
+mov rax, qword[temp]
+xor rcx, rcx
+
+conv2:
+cmp al, 0x39
+jle norm2
+sub al, 0x27			;assumes small characters (0x07 for capital characters)
+norm2:				;convert each character to hex unless it is '\n'
+sub al, 0x30
+inc dl
+rol rax, 0x08
+cmp al, 0x0A
+jne conv2
+
+mov al, 0x00			;remove the '\n'
+mov cx, dx			;the rol operation's effects must be removed
+rep ror rax, 0x08
+
+mov [rsi], rax
+add rsi, 0x08			;store number and continue loop
+dec bx
+jnz input
+
+mov rdi, 0x00
+mov di, word[count]
+mov rsi, arr
+xor rax, rax			;sum variable
+xor rdx, rdx			;array number
+
+sum:
+mov rdx, qword[rsi]
+
+mov cl, 0x08
+adder:
+add al, dl			;add digits
+add al, ch			;add previous addition carry
+mov ch, ah			;store current carry
+mov ah, 0x00			;clear carry space
+rol rax, 0x08
+rol rdx, 0x08			;continue to next digit
+loop adder
+
+add rsi, 0x08
+dec di
+jnz sum
+
+mov [ans], rax
+
+xor rdx, rdx
+xor rcx, rcx
+mov cx, 8
+conv3:
+cmp al, 0x09
+jle norm3
+add al, 0x07
+norm3:
+add al, 0x30
+rol rax, 8
+loop conv3
+
+
+print resu1, lresu1
+print ans, 8
+print resu2, lresu2
+println
+
+mov rax, 0x3c
+mov rdi, 0x00
+syscall
