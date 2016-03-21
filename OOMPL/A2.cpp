@@ -4,6 +4,7 @@
 
 using namespace std;
 
+#define MAXSIZE 100
 #define FOUND 0
 #define MISSING -1
 #define CAPACITY 25
@@ -12,49 +13,64 @@ using namespace std;
 #define NORMAL -4
 
 class book{
+	friend void init(book &, char [MAXSIZE], char [MAXSIZE], char [MAXSIZE], float, int);
 	private:
-		string author;
-		string title;
-		string publisher;
+		char author[MAXSIZE];
+		char title[MAXSIZE];
+		char publisher[MAXSIZE];
 		float price;
 		int stock;
 	public:
-		string getname() { return title; }
-		string getauth() { return author; }
+		char * getname() { return title; }
+		char * getauth() { return author; }
 		int getstock() { return stock; }
 		int getprice() { return price; }
 		void details();
-		book();
+		book(int);
 		void buy(int);
 };
+
+void init(book &empty, char auth[MAXSIZE] , char name[MAXSIZE], char pub[MAXSIZE], float cost, int quantity)
+{
+	strcpy(empty.author, auth);
+	strcpy(empty.title, name);
+	strcpy(empty.publisher, pub);
+	empty.price = cost;
+	empty.stock = quantity;
+}
 
 void book::details()
 {
 	cout<<"\n\tTitle : "<<title;
 	cout<<"\n\tAuthor : "<<author;
 	cout<<"\n\tPublication : "<<publisher;
-	cout<<setprecision(2)<<"\n\tPrice : "<<price;
-	cout<<"\n\n\tStock Left : "<<stock;
+	cout<<fixed<<setprecision(2)<<"\n\tPrice : "<<price;
+	cout<<"\n\tStock Left : "<<stock;
+	if (stock == 0)
+		cout<<"\nALL SOLD OUT!!";
 	if (stock < 20)
 		cout<<"\nHurry! Limited copies left..\nBuy it Now!";
-	if (stock > 100)
+	if (stock > 4000)
 		cout<<"\nQuite an unpopular book.. :(";
 	cout<<endl;
 }
 
-book::book()
+book::book(int real = 0)
 {
-	cout<<"\nEnter Book Title: ";
-	getline(cin,title);
-	cout<<"\nEnter \""<<title<<"\"'s Author: ";
-	getline(cin,author);
-	cout<<"\nEnter \""<<title<<"\"'s Publisher name: ";
-	getline(cin,publisher);
-	cout<<"\nEnter \""<<title<<"\"'s Price: ";
-	cin>>price;
-	cout<<"\nEnter \""<<title<<"\"'s Stock available: ";
-	cin>>stock;
-	cin.ignore();
+	if (real)
+	{
+		cout<<"\nEnter Book Title: ";
+		cin.getline(title, MAXSIZE);
+		cout<<"\nEnter \""<<title<<"\"'s Author: ";
+		cin.getline(author, MAXSIZE);
+		cout<<"\nEnter \""<<title<<"\"'s Publisher name: ";
+		cin.getline(publisher, MAXSIZE);
+		cout<<"\nEnter \""<<title<<"\"'s Price: ";
+		cin>>price;
+		cout<<"\nEnter \""<<title<<"\"'s Stock available: ";
+		cin>>stock;
+		cin.ignore();
+	}
 }
 
 void book::buy(int copies)
@@ -64,12 +80,13 @@ void book::buy(int copies)
 
 class library{
 	private:
-		book *stash[CAPACITY];
+		book *stash[CAPACITY + 5];
 		int books;
 		int errflag;
+		void setup();
 		void fillstash();
 		void clearstash();
-		int search(string, string);
+		int search(char *, char *);
 		void display();
 		void seek();
 		void billout(book&, int);
@@ -80,19 +97,30 @@ class library{
 void library::control()
 {
 	books = 0;
-	string command;
+	int choice = 0;
+	setup();
+	char command[MAXSIZE];
 	cout<<"\nPress Enter to continue.\n";
-	getline(cin,command);
+	cin.getline(command, MAXSIZE);
 	while (1)
 	{
-		if ( command.compare("add book") == 0 )
-			fillstash();
-		else if ( command.compare("del book") == 0 )
-			clearstash();
-		else if ( command.compare("build") == 0)
-			break;
-		else if (books == 0)
+		if (books == 0)
+		{
 			cout<<"\n\nSorry, the library is empty. Please report this problem to the librarian!\n\n";
+			choice = 0;
+		}
+		else if ( strcmp(command,"build") == 0)
+			break;
+		else if ( choice == 1 || strcmp(command,"add book") == 0 )
+		{
+			fillstash();
+			choice = 1;
+		}
+		else if ( choice == 2 || strcmp(command,"del book") == 0 )
+		{
+			clearstash();
+			choice = 2;
+		}
 		else
 			break;
 
@@ -104,16 +132,28 @@ void library::control()
 			;
 
 		cout<<"Enter command: ";
-		getline(cin,command);
+		cin.getline(command, MAXSIZE);
 	}
 	seek();
+}
+
+void library::setup()
+{
+	books = 5;
+	for (int i = 0; i < CAPACITY ; i++)
+		stash[i] = new book(0);
+	init(*stash[0], "Leo Tolstoy", "War and Peace", "The Russian Messenger", 650, 883);
+	init(*stash[1], "Mark Twain", "The Adventures of Huckleberry Finn", "Penguin Classics", 159, 1034);
+	init(*stash[2], "Leo Tolstoy", "Anna Karenina", "Barnes & Noble Classics", 244, 1325);
+	init(*stash[3], "Jonathan Swift", "Gulliver's Travels", "Dover Thrift Editions", 119, 1503);
+	init(*stash[4], "Charles Dickens", "David Copperfield", "Penguin Classics", 189, 4869);
 }
 
 void library::fillstash()
 {
 	if (books < CAPACITY)
 	{
-		book *temp = new book();
+		book *temp = new book(1);
 		stash[books++] = temp;
 		errflag = NORMAL;
 	}
@@ -124,11 +164,11 @@ void library::fillstash()
 void library::clearstash()
 {
 	int pos = -1;
-	string auth, name;
+	char auth[MAXSIZE], name[MAXSIZE];
 	cout<<"\nEnter the Book Name: ";
-	getline(cin,name);
+	cin.getline(name, MAXSIZE);
 	cout<<"\nEnter the Author Name: ";
-	getline(cin,auth);
+	cin.getline(auth, MAXSIZE);
 	pos = search(name,auth);
 	if (pos == MISSING)
 	{
@@ -148,18 +188,18 @@ void library::clearstash()
 			pos++;
 		}
 		books--;
-		cout<<"\n\nBook Deleted!";
+		cout<<"\nBook Deleted!\n";
 		errflag = NORMAL;
 	}
 }
 
-int library::search(string name, string auth)
+int library::search(char name[MAXSIZE], char auth[MAXSIZE])
 {
 	int i = -1, testauth = 0, testname = 0;
 	while (++i < books)
 	{
-		testauth = auth.compare(stash[i]->getauth());
-		testname = name.compare(stash[i]->getname());
+		testauth = strcmp(auth,stash[i]->getauth());
+		testname = strcmp(name, stash[i]->getname());
 		if ( testauth == 0 && testname == 0 )
 				break;
 	}
@@ -177,23 +217,30 @@ void library::display()
 	if (books == 0)
 		cout<<"\n\nSorry, the library is empty. Please report this problem to the librarian!\n\n";
 	while (i < books)
+	{
+		if (i != 0 && (i+1) % 3 == 0)
+		{
+			cout<<"Press enter to continue..";
+			cin.get();
+		}
 		stash[i++]->details();
+	}
 }
 
 void library::seek()
 {
 	int pos = -1, count = 0;
 	char op = 'y';
-	string auth, name;
+	char auth[MAXSIZE], name[MAXSIZE];
 	cout<<"\n\nThis program will aid you to Search a book and buy it!.";
 	while(op == 'y' || op == 'Y')
 	{
 		cout<<"\n\nHere is the entire Library:\n";
 		display();
 		cout<<"\nEnter the Book Name: ";
-		getline(cin,name);
+		cin.getline(name, MAXSIZE);
 		cout<<"\nEnter the Author Name: ";
-		getline(cin,auth);
+		cin.getline(auth, MAXSIZE);
 		pos = search(name,auth);
 
 		if (pos == EMPTY)
@@ -204,14 +251,14 @@ void library::seek()
 		{
 			pos = -1;
 			while(++pos < books)
-				if (auth.compare(stash[pos]->getauth()) == 0)
+				if (strcmp(auth,stash[pos]->getauth()) == 0)
 					++count;
 					if (count != 0)
 					{
 						cout<<"\nWe do not have the book you want.\nYou may try these books instead: \n";
 						for (pos = 0; pos < books; pos++)
-						if(auth.compare(stash[pos]->getauth()))
-						stash[pos]->details();
+							if(strcmp(auth,stash[pos]->getauth()) == 0)
+								stash[pos]->details();
 					}
 					else
 						cout<<"\n\nSorry, we do not have the book you want. Please do notify the librarian to place your order for it!\n\n";
@@ -234,19 +281,22 @@ void library::billout(book &favourite, int copies)
 	int price = favourite.getprice();
 	int stock = favourite.getstock();
 	char op = '\0';
-	if (copies > stock)
+	if (stock != 0)
 	{
-		cout<<"\nWoah! You're a fan! We'll sell out our entire stock to you..";
-		copies = stock;
+		if (copies > stock)
+		{
+			cout<<"\nWoah! You're a fan! We'll sell out our entire stock to you..";
+			copies = stock;
+		}
+		cout<<"\nThe purchase costs: "<<fixed<<setprecision(2)<<copies*price<<endl;
+		cout<<"\nDo you want to buy? (y/n) : ";
+		cin>>op;
+		cin.ignore();
+		if (op == 'y' || op == 'Y')
+			favourite.buy(copies);
 	}
-	cout<<"\nThe purchase costs: "<<setprecision(2)<<copies*price<<endl;
-	cout<<"\nDo you want to buy? (y/n) : ";
-	cin>>op;
-	cin.ignore();
-	if (op == 'y' || op == 'Y')
-	{
-		favourite.buy(copies);
-	}
+	else
+		cout<<"\nSorry. This book is so popular, we don't have it in stock anymore!\nPlease contact the librarian for this issue.";
 }
 
 int main()
