@@ -71,7 +71,7 @@ add dx, ax
 mov word[count], dx
 
 xor rax, rax
-mov rax, 0x0C
+mov rax, 0x0C		;sys_brk system call
 mov rdi, [mem_start]
 syscall
 
