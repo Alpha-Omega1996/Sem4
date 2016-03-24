@@ -1,0 +1,258 @@
+global _start
+
+section .data
+welcome db 10,"This program will aid you in adding hexadecimal numbers. (upto 99)",10
+lwelcome equ $-welcome
+inputC db 10,"Enter the count of numbers you want to add: "
+linputC equ $-inputC
+errorC db 10,10,"You have entered an invalid limit! Upto 99 is allowed."
+lerrorC equ $-errorC
+inputN db 10,"Enter the Hex number: "
+linputN equ $-inputN
+errorN db 10,10,"You have entered an invalid Number! Upto 0-9 and A-F (upto 4 digits) is allowed."
+lerrorN equ $-errorN
+result db 10,"The Sum is: "
+lresult equ $-result
+
+section .bss
+	;macros
+%macro print 2
+mov edx, %2
+mov ecx, %1
+mov ebx, 1
+mov eax, 4
+int 80h
+%endmacro
+
+%macro scan 2
+mov edx, %2
+mov ecx, %1
+mov ebx, 0
+mov eax, 3
+int 80h
+%endmacro
+	;variables
+temp resb 5		;upto 4 digit input + \r
+arr resb 40		;upto 10 16-bit numbers
+ans resb 6		;upto 5 digit (5 bytes) number
+count resb 2		;upto 2 digit number
+
+	;total size of variables = 5+40+6+2 = 53 bytes.
+
+section .text
+_start:
+
+print welcome, lwelcome	;welcome user
+print inputC, linputC	;prompt for count of numbers (less than 99)
+
+mov esi, count		;place count address
+call in			;get count
+
+cmp byte[temp], 0FFh	;check for error
+jne validC
+print errorC, lerrorC	;error's response
+jmp abort		;break out of program
+
+cmp byte[count], 0Ah	;check for validity (0A0Ah => 0909h = 99 due to encoding)
+jle validC
+print errorC, lerrorC	;error's response
+jmp abort		;break out of program
+
+validC:			;normal operation
+mov edi, 4
+mov eax, [count]
+push rax		;save count of numbers
+decode:
+cmp al, 010h
+jne ignore
+mov al, 0h
+ignore:
+rol eax, 8
+dec edi
+jnz decode
+
+mov esi, arr		;place arr address
+
+nums:			; loop for taking all numbers
+print inputN, linputN	;prompt for number (hex only)
+call in			;take number
+
+cmp byte[temp], 0FFh	;check for error
+jne validN
+print errorN, lerrorN	;error's response
+jmp abort		;break out of program
+
+validN:			;normal response
+add esi, 4		;move to next location
+dec byte[count]		;this is loop counter
+jnz nums
+
+pop rax
+mov [count], eax	;restore count
+push rax		;save it again
+mov esi, arr		;place arr address
+xor eax, eax		;empty eax
+xor ebx, ebx		;empty ebx
+xor ecx, ecx		;empty ecx
+
+sums:
+mov ebx, dword[esi]	;take number
+mov edi, 4		;upto 4 digit
+
+adder:
+cmp bl, 010h		;if number contains '\r'
+je next			;skip the number, don't add
+cmp al, 010h		;if sum conatins '\r'
+je copy			;replace bl in it
+add al, bl		;otherwise, al = al + bl
+add al, cl		;also add carry, al = al + cl
+carry:
+mov cl, al		;copy al into cl
+and cl, 0F0h		;mask out result
+rol cl, 4		;find carry
+and al, 0Fh		;clear carry in al
+jmp next
+copy:
+mov al, bl		;replaces bl in al
+next:
+rol eax, 8		;select next sum digit
+rol ebx, 8		;select next no. digit
+dec edi			;moves to next digit
+jnz adder
+
+add esi, 4		;move to next number in array
+dec byte[count]		;count down to end loop.
+jnz sums
+
+mov dword[ans], eax	;store answer
+print result, lresult	;display result message
+
+mov eax, ebx		;save answer in another register
+pop rax			;pop count from stack
+mov dword[count], eax	;save count
+mov eax, ebx		;restore answer in eax
+mov edi, 4		;counter for repeating instructions for each byte in 32-bit dword
+
+disp:			; now display number using eax
+cmp al, 010h		;if encoded number was 16, it is \r
+je space		;decode it
+cmp al, 09h		;if al <= 9
+jle letterize		;if yes, convert to digit character
+add al, 07h		;if not, add gap
+letterize:
+add al, 30h		;convert to proper character
+jmp done		;skip to storage
+space:
+mov al, 0Ah		;convert to \r
+done:
+ror eax, 8		;discard that byte
+dec edi			;counter to work loop.
+jnz disp
+
+print temp, 4
+
+abort:
+mov eax, 1
+mov edi, 0
+int 080h
+									;procedures!!
+in:			; loop to take one multidigit input
+
+scan temp, 4		;take input
+mov ebx, 1		;set error flag
+mov ecx, [temp]
+mov edi, 4		;assumes 4 digit input, works for 0 to 4 digit input
+
+test:			;a validation check for input!!
+cmp cl, 0Ah		;if current byte contains '\r'
+je hop			;skip it
+cmp cl, 0h		;if lesser digits, excess space has 0
+je hop			;skip that too
+
+test0:
+cmp cl, 030H		;cl >= '0'
+jge test9		;if yes, check if cl is digit
+xor ebx, ebx		;otherwise, set error signal
+jmp cont
+
+test9:
+cmp cl, 039h		;cl <= '9'
+jle cont		;if yes, cl is a digit, case closed
+jmp test10c		;otherwise, check if cl has hex character
+
+test10c:		;for caps 'A'
+cmp cl, 041h		;cl >= 10 (in caps char hex)
+jge test15c		;if yes, check if cl is a caps hex character
+xor ebx, ebx		;otherwise, set error signal
+jmp cont
+
+test15c:
+cmp cl, 046h		;cl <= 15 (in hex)
+jle conv		;if yes, cl is a caps hex character, case closed
+jmp test10s		;otherwise check if cl has small hex character
+
+test10s:
+cmp cl, 061h		;cl >= 10 (in small char hex)
+jge test15s		;if yes, check if cl is a small hex character
+xor ebx, ebx		;otherwise, set error signal
+jmp cont
+
+test15s:
+cmp cl, 066h		;cl <= 15 (in small char hex)
+jle cont		;if yes, cl is a small hex character, case closed
+xor ebx, ebx		;otherwise, set error signal
+
+cont:
+cmp ebx, 1		;check for error
+jne err			;if error, jump to err (abort loop)
+jmp hop			;otherwise continue to next ascii character entered
+
+hop:
+rol ecx, 8		;roll next character into cl
+dec edi			;there are only 4 roll-in operations until you repeat the number
+jnz test		;loop back to testing
+
+end:
+mov dword[temp], ecx	;store number between call
+call conv		;convert number
+mov ecx, [temp]		;take converted number
+mov dword[esi], ecx	;store it in array
+mov dword[temp], 0	;store success signal
+jmp quit
+
+err:
+mov dword[temp], 0FFh	;store error signal
+
+quit:			;return to caller
+ret
+
+conv:			; loop to convert one multidigit input to specific format
+mov ecx, dword[temp]	;take number
+mov edi, 4		;set number of rotations
+
+fix:
+cmp cl, 0Ah		;check with '\r'
+je encode
+cmp cl, 0h
+je skip
+jmp tests
+encode:
+mov cl, 010h		;'\r' will be stored as 16, the numbers 0-15 will be stored as it is
+jmp skip
+tests:
+cmp cl, 046h		;check with 'F'
+jle digitize		;if less, convert caps character to digit
+sub cl, 020h		;if more, convert small character to caps
+digitize:
+cmp cl, 039h		;check with '9'
+jle norm		;if less, convert ascii digit to normal digit
+sub cl, 07h		;if more, convert character to ascii digit
+norm:
+sub cl, 030h		;convert ascii digit to hex digit
+
+skip:
+rol ecx, 8
+dec edi
+jnz fix
+
+ret
