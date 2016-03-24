@@ -1,0 +1,56 @@
+Write up content for second assignment:
+
+1. flow chart
+2. problem stmt.
+3. theory
+         Algorithm
+    1. def of directives....
+        directive used
+
+    2. Macro defination.. E-with example
+    3. instruction used
+    4. All string instructions
+
+4. Mathematical model
+
+Write up content for Third assignment:
+Non-Overlapped block transfer
+1. without string specific instruction
+2. with string specific instruction
+
+1. flow chart (without string specific instruction)
+2. Problem statement
+3. theory
+    3.1 Algorithm
+    3.2 instruction used
+4. mathematical model
+
+-Overlapped block transfer
+1. without string specific instruction
+2. with string specific instruction
+
+1. flow chart (without string specific instruction)
+2. Problem statement
+3. theory
+    3.1 Algorithm
+    3.2 REP prefix
+    3.3 instruction used
+3.4 segmentation of memory.
+3.5 Diagram for block transfer, with example.
+4. mathematical model
+
+Write up content for Fifth assignment:
+Far Procedure
+
+1. Problem stmt
+2. flowchart
+3. Algorithm
+
+4. Theory
+     Diff bet FAR and NEAR Procedure
+     Instruction Used( TASM , NASM)
+     Assembler Directive Used (TASM and NASM)
+     Program execution steps (TASM )
+     
+
+5. Mathematical Model
