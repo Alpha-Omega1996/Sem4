@@ -1,4 +1,5 @@
-#include <iostream>
+ #include <iostream>
+#include <iomanip>
 #include <cmath>
 
 using namespace std;
@@ -10,9 +11,9 @@ class Complex
 		float imag;
 	public:
 		float getR() { return real; }
-		void setR(float r) { real = r; }
+		float setR(float r) { real = r; }
 		float getI() { return imag; }
-		void setI(float i) { imag = i; }
+		float setI(float i) { imag = i; }
 		Complex(int r = 0, int i = 0)
 		{
 			this->real = r;
@@ -27,204 +28,62 @@ class Complex
 		{
 			this->imag = -this->imag;
 		}
-		float operator%(Complex that)
+		float operator%()
 		{
-			return sqrt(that.getR()*that.getR() + that.getI()*that.getI());
+			return sqrt(this->real*this->real + this->imag*this->imag);
 		}
-		void print()
+		void operator=(Complex that)
 		{
-			cout<<this->real;
-			if (this->imag > 0)
-				cout<<" + ";
-			else
-				cout<<" - ";
-			cout<<this->imag;
+			this->real = that.getR();
+			this->imag = that.getI();
 		}
 		Complex operator-(Complex that)
 		{
-			Complex ans;
+			Complex ans();
 			ans.setR( this->real - that.getR() );
 			ans.setI( this->imag - that.getI() );
 			return ans;
 		}
 		Complex operator+(Complex that)
 		{
-			Complex ans;
-			ans.setR( this->real + that.getR() );
-			ans.setI( this->imag + that.getI() );
+			Complex ans();
+			ans.getR( this->real + that.getR() );
+			ans.getI( this->imag + that.getI() );
 			return ans;
 		}
 		Complex operator*(Complex that)
 		{
-			Complex ans;
+			Complex ans();
 			ans.setR( this->real*that.getR() - this->imag*that.getI() );
 			ans.setI( this->real*that.getI() + this->imag*that.getR() );
 			return ans;
 		}
 		Complex operator/(Complex that)
 		{
-			Complex ans;
-			ans = (*this)*( ~that );
+			Complex ans();
+			ans = (*this)*(~that);
 			float factor = (%that)*(%that);
 			ans = ans/factor;
 			return ans;
 		}
+		friend operator>> (istream, Complex);
+		friend operator<< (ostream s, Complex model);
 };
 
-void add()
+void operator>>(istream s, Complex bag)
 {
-	char type = '\0';
-	Complex a, b;
-	Complex *temp;
-	int c, d;
-	for (int i = 0; i < 2; i++)
-	{
-		cout<<" \n1> Complex\n2> Real";
-		cout<<"\nEnter number type: ";
-		cin>>type;
-		switch(type)
-		{
-			case '1':
-				cout<<"\nReal : ";
-				cin>>c;
-				cout<<"\nImaginary : ";
-				cin>>d;
-				temp = new Complex(c,d);
-				if (&a == NULL)
-					a = *temp;
-				else
-					b = *temp;
-				break;
-			case '2':
-				cout<<"\nNumber : ";
-				cin>>c;
-				temp = new Complex(c);
-				b = *temp;
-				break;
-			default: cout<<"Invalid Entry : "<<type;
-		}
-	}
-	a = a+b;
-	cout<<"Sum is ";
-	a.print();
-	cout<<endl;
+	cout<<"\nEnter Real part : ";
+	s>>bag.real;
+	cout<<"\nEnter Imaginary part : ";
+	s>>bag.imag;
 }
 
-void subtract()
+void operator<<(ostream s, Complex model)
 {
-	char type = '\0';
-	Complex a, b;
-	Complex *temp;
-	int c, d;
-	for (int i = 0; i < 2; i++)
-	{
-		cout<<" \n1> Complex\n2> Real";
-		cout<<"\nEnter number type: ";
-		cin>>type;
-		switch(type)
-		{
-			case '1':
-				cout<<"\nReal : ";
-				cin>>c;
-				cout<<"\nImaginary : ";
-				cin>>d;
-				temp = new Complex(c,d);
-				if (&a == NULL )
-					a = *temp;
-				else
-					b = *temp;
-				break;
-			case '2':
-				cout<<"\nNumber : ";
-				cin>>c;
-				temp = new Complex(c);
-				b = *temp;
-				break;
-			default: cout<<"Invalid Entry : "<<type;
-		}
-	}
-	a = a-b;
-	cout<<"Difference is ";
-	a.print();
-	cout<<endl;
-}
-
-void multiply()
-{
-	char type = '\0';
-	Complex a, b;
-	Complex *temp;
-	int c, d;
-	for (int i = 0; i < 2; i++)
-	{
-		cout<<" \n1> Complex\n2> Real";
-		cout<<"\nEnter number type: ";
-		cin>>type;
-		switch(type)
-		{
-			case '1':
-				cout<<"\nReal : ";
-				cin>>c;
-				cout<<"\nImaginary : ";
-				cin>>d;
-				temp = new Complex(c,d);
-				if (&a == NULL )
-					a = *temp;
-				else
-					b = *temp;
-				break;
-			case '2':
-				cout<<"\nNumber : ";
-				cin>>c;
-				temp = new Complex(c);
-				b = *temp;
-				break;
-			default: cout<<"Invalid Entry : "<<type;
-		}
-	}
-	a = a*b;
-	cout<<"Product is ";
-	a.print();
-	cout<<endl;
-}
-
-void divide()
-{
-	char type = '\0';
-	Complex a, b;
-	Complex *temp;
-	int c, d;
-	for (int i = 0; i < 2; i++)
-	{
-		cout<<" \n1> Complex\n2> Real";
-		cout<<"\nEnter number type: ";
-		cin>>type;
-		switch(type)
-		{
-			case '1':
-				cout<<"\nReal : ";
-				cin>>c;
-				cout<<"\nImaginary : ";
-				cin>>d;
-				temp = new Complex(c,d);
-				if (&a == NULL )
-					a = *temp;
-				else
-					b = *temp;
-				break;
-			case '2':
-				cout<<"\nNumber : ";
-				cin>>c;
-				temp = new Complex(c);
-				b = *temp;
-				break;
-			default: cout<<"Invalid Entry : "<<type;
-		}
-	}
-	a = a/b;
-	cout<<"Quotient is ";
-	a.print();
-	cout<<endl;
+	if (that.imag >= 0)
+		here<<model.real<<" + "<<model.imag<<"i";
+	else
+		here<<model.real<<" - "<<model.imag<<"i";
 }
 
 int main()
@@ -252,5 +111,120 @@ int main()
 			default: cout<<"Invalid Entry : "<<op;
 		}
 	}
-	return 0;
+}
+
+void add()
+{
+	char type = '\0';
+	Complex a, b;
+	int c, d;
+	for (int i = 0; i < 2; i++)
+	{
+		cout<<" \n1> Complex\n2> Real";
+		cout<<"\nEnter number type: ";
+		cin>>type;
+		switch(type)
+		{
+			case '1':
+				cin>>a;
+				break;
+			case '2':
+				cout<<"\nNumber : ";
+				cin>>c;
+				b = new Complex(c);
+				break;
+			default: cout<<"Invalid Entry : "<<type
+		}
+	}
+	a = a+b;
+	cout<<"Sum is ";
+	cout<<a;
+	cout<<endl;
+}
+
+void subtract()
+{
+	char type = '\0';
+	Complex a, b;
+	int c, d;
+	for (int i = 0; i < 2; i++)
+	{
+		cout<<" \n1> Complex\n2> Real";
+		cout<<"\nEnter number type: ";
+		cin>>type;
+		switch(type)
+		{
+			case '1':
+				cin>>a;
+				break;
+			case '2':
+				cout<<"\nNumber : ";
+				cin>>c;
+				b = new Complex(c);
+				break;
+			default: cout<<"Invalid Entry : "<<type
+		}
+	}
+	a = a-b;
+	cout<<"Difference is ";
+	cout<<a;
+	cout<<endl;
+}
+
+void multiply()
+{
+	char type = '\0';
+	Complex a, b;
+	int c, d;
+	for (int i = 0; i < 2; i++)
+	{
+		cout<<" \n1> Complex\n2> Real";
+		cout<<"\nEnter number type: ";
+		cin>>type;
+		switch(type)
+		{
+			case '1':
+				cin>>a;
+				break;
+			case '2':
+				cout<<"\nNumber : ";
+				cin>>c;
+				b = new Complex(c);
+				break;
+			default: cout<<"Invalid Entry : "<<type
+		}
+	}
+	a = a*b;
+	cout<<"Product is ";
+	cout<<a;
+	cout<<endl;
+}
+
+void divide()
+{
+	char type = '\0';
+	Complex a, b;
+	int c, d;
+	for (int i = 0; i < 2; i++)
+	{
+		cout<<" \n1> Complex\n2> Real";
+		cout<<"\nEnter number type: ";
+		cin>>type;
+		switch(type)
+		{
+			case '1':
+				cin>>a;
+				break;
+			case '2':
+				cout<<"\nNumber : ";
+				cin>>c;
+				b = new Complex(c);
+				break;
+			default: cout<<"Invalid Entry : "<<type
+		}
+	}
+	a = a/b;
+	cout<<"Quotient is ";
+	cout<<a;
+	cout<<endl;
 }
