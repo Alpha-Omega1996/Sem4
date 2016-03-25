@@ -6,9 +6,6 @@ using namespace std;
 
 class Complex
 {
-	private:
-		float real;
-		float imag;
 	public:
 		float getR() { return real; }
 		float setR(float r) { real = r; }
@@ -66,24 +63,30 @@ class Complex
 			ans = ans/factor;
 			return ans;
 		}
-		friend operator>> (istream, Complex);
-		friend operator<< (ostream s, Complex model);
+		friend istream& operator>> (istream& , Complex& );
+		friend ostream& operator<< (ostream&, const Complex&);
+	private:
+		float real;
+		float imag;
+
 };
 
-void operator>>(istream s, Complex bag)
+ostream& operator>>(istream &s, Complex &bag)
 {
 	cout<<"\nEnter Real part : ";
 	s>>bag.real;
 	cout<<"\nEnter Imaginary part : ";
 	s>>bag.imag;
+	return s;
 }
 
-void operator<<(ostream s, Complex model)
+ostream& operator<<(ostream &s, const Complex &model)
 {
 	if (that.imag >= 0)
 		here<<model.real<<" + "<<model.imag<<"i";
 	else
 		here<<model.real<<" - "<<model.imag<<"i";
+	return s;
 }
 
 int main()

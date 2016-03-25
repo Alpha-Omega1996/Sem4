@@ -98,11 +98,13 @@ istream & operator>> (istream &here, String &inside_out)
 		c_s[inside_out.s.length()-i-1] = temp;
 	}
 	inside_out.s.assign(c_s);
+	return here;
 }
 
 ostream & operator<< (ostream &here, String &model)
 {
 	here<<model.s;
+	return here;
 }
 
 int main()
