@@ -1,12 +1,12 @@
 #include <iostream>
 #include <graphics.h>
-
+#include <math.h>
 using namespace std;
 
 #define SIGN(x) ( (x > 0) ? 1 : ( (x < 0) ? -1 : 0 ) )
 #define ABSD(x,y)	( (x-y > 0) ? x-y : y-x )
 #define swap(x,y) do{ int temp = x; x = y; y = temp; }while(0)
-
+#define INT(x) (int)( floor(0.5+x) ) 
 
 class Point
 {
@@ -71,9 +71,9 @@ void Line::dda()
 	dx /= (float)length;
 	dy /= (float)length;
 	float x = x1 + 0.5*SIGN(dx), y = y1 + 0.5*SIGN(dy);
-	for (int i = 0 ; i <= length ; i++)
+	for (int i = 0 ; i < length ; i++)
 	{
-		putpixel(x,y,colour);
+		putpixel(INT(x),INT(y),colour);
 		x += dx;
 		y += dy;
 	}
