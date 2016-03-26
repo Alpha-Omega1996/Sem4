@@ -4,5 +4,9 @@ g++ -o tmpw sem_w.cpp -lpthread
 g++ -o tmpr sem_r.cpp -lpthread
 touch done
 fi
-./tmpw 1 $1 /demo &
-./tmpr $1 /demo
+msg=$1
+if [ -z "$msg" ] ;then
+msg="5"
+fi
+./tmpw 1 $msg /demo &
+./tmpr $msg /demo
