@@ -45,13 +45,13 @@ void book::details()
 	cout<<"\n\tAuthor : "<<author;
 	cout<<"\n\tPublication : "<<publisher;
 	cout<<fixed<<setprecision(2)<<"\n\tPrice : "<<price;
-	cout<<"\n\tStock Left : "<<stock;
+	cout<<"\n\tStock Left : "<<stock<<endl;
 	if (stock == 0)
-		cout<<"\nALL SOLD OUT!!";
+		cout<<"\nALL SOLD OUT!!"<<endl;
 	if (stock < 20)
-		cout<<"\nHurry! Limited copies left..\nBuy it Now!";
-	if (stock > 100)
-		cout<<"\nQuite an unpopular book.. :(";
+		cout<<"\nHurry! Limited copies left..\nBuy it Now!"<<endl;
+	if (stock > 2000)
+		cout<<"\nQuite an unpopular book.. :("<<endl;
 }
 
 book::book(int real = 0)
@@ -103,12 +103,13 @@ void library::control()
 	cin.getline(command, MAXSIZE);
 	while (1)
 	{
+		//parsing entered commands (if any)
 		if (books == 0)
 		{
 			cout<<"\n\nSorry, the library is empty. Please report this problem to the librarian!\n\n";
 			choice = 0;
 		}
-		else if ( strcmp(command,"build") == 0)
+		else if ( strcmp(command,"build") == 0 )
 			break;
 		else if ( choice == 1 || strcmp(command,"add book") == 0 )
 		{
@@ -123,15 +124,23 @@ void library::control()
 		else
 			;
 
+		//parsing errors due to commands (if any)
 		if (errflag == FULL)
 			cout<<"\n\nCannot add more books, stash full!\n";
 		else if (errflag == EMPTY)
 			cout<<"\n\nCannot delete more books, stash empty!\n";
 		else
 			;
-
-		cout<<"Enter command: ";
-		cin.getline(command, MAXSIZE);
+			
+		//If the command is auto repeated (choice = 1 or 2) or User mode is asked
+		if (strlen(command) != 0 || choice != 0)
+		{
+			cout<<command;
+			cout<<"Enter command: ";
+			cin.getline(command, MAXSIZE);
+		}
+		else
+			break;
 	}
 	seek();
 }
@@ -216,7 +225,7 @@ void library::display()
 	{
 		if (i != 0 && (i+1) % 3 == 0)
 		{
-			cout<<"Press enter to continue..";
+			cout<<"\nPress enter to continue..";
 			cin.get();
 		}
 		stash[i++]->details();
@@ -260,7 +269,7 @@ void library::seek()
 		}
 		else
 		{
-			stash[pos].details();
+			stash[pos]->details();
 			cout<<"\nEnter the number of copies you want to buy: ";
 			cin>>count;
 			billout(*stash[pos], count);
@@ -282,7 +291,7 @@ void library::seek()
 
 void library::billout(book &favourite, int copies)
 {
-	int price = favourite.getprice();
+	float price = favourite.getprice();
 	int stock = favourite.getstock();
 	char op = '\0';
 	if (stock != 0)
@@ -298,6 +307,8 @@ void library::billout(book &favourite, int copies)
 		cin.ignore();
 		if (op == 'y' || op == 'Y')
 			favourite.buy(copies);
+		else if (op == 'n' || op == 'N')
+			;
 		else
 			cout<<"\nAssuming that you don't want to buy the book..\n";
 	}
