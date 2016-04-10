@@ -1,6 +1,7 @@
 #include <iostream>
 #include <iomanip>
 #include <cstring>
+#include <string>
 
 using namespace std;
 
@@ -13,7 +14,7 @@ using namespace std;
 #define NORMAL -4
 
 class book{
-	friend void init(book &, char [MAXSIZE], char [MAXSIZE], char [MAXSIZE], float, int);
+	friend void init(book &, string, string, string, float, int);
 	private:
 		char author[MAXSIZE];
 		char title[MAXSIZE];
@@ -30,11 +31,11 @@ class book{
 		void buy(int);
 };
 
-void init(book &empty, char auth[MAXSIZE] , char name[MAXSIZE], char pub[MAXSIZE], float cost, int quantity)
+void init(book &empty, string auth, string name, string pub, float cost, int quantity)
 {
-	strcpy(empty.author, auth);
-	strcpy(empty.title, name);
-	strcpy(empty.publisher, pub);
+	strcpy(empty.author, auth.c_str());
+	strcpy(empty.title, name.c_str());
+	strcpy(empty.publisher, pub.c_str());
 	empty.price = cost;
 	empty.stock = quantity;
 }
